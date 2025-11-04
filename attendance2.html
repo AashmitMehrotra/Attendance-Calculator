@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Attendance Calculator</title>
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000;
+      --panel: rgba(255,255,255,0.04);
+      --muted: #cfcfcf;
+      --input-bg: #111;
+      --accent: #fff;
+      --border: rgba(255,255,255,0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      color: var(--accent);
+      font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    
+    .watermark {
+      position: fixed;
+      bottom: 25px;
+      right: 30px;
+      font-family: "Poppins", sans-serif;
+      font-size: 3.5rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.12);
+      user-select: none;
+      pointer-events: none;
+      letter-spacing: 2px;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      width: 95%;
+      max-width: 720px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-family: "Poppins", sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    fieldset {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      padding: 12px;
+    }
+
+    legend {
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0 8px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: 1px solid #222;
+      background: var(--input-bg);
+      color: var(--accent);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    input[type="number"]:focus { border: 1px solid #555; }
+
+    .controls {
+      grid-column: 1 / -1;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 160px;
+      transition: transform 0.2s ease, background 0.3s;
+    }
+    button:hover { background: #f0f0f0; transform: scale(1.02); }
+
+    .progress-wrap {
+      grid-column: 1 / -1;
+      margin-top: 18px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .progress {
+      height: 18px;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: #fff;
+      transition: width 700ms ease;
+    }
+
+    .result {
+      grid-column: 1 / -1;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #eaeaea;
+      text-align: center;
+    }
+
+    .strong { font-weight: 700; color: #fff; }
+
+    @media (max-width: 720px) {
+      form { grid-template-columns: 1fr; }
+      .controls { flex-direction: column; align-items: stretch; }
+      button { width: 100%; }
+      .watermark { font-size: 2.5rem; right: 20px; bottom: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+
+    <h1>Attendance Calculator</h1>
+
+    <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
+
+
+      <fieldset>
+        <legend>Lectures (1 point each)</legend>
+        <label for="lectTotal"> Total lectures </label>
+        <input id="lectTotal" type="number" min="0" placeholder="e.g. 40" />
+        <label for="lectPresent"> Lectures attended </label>
+        <input id="lectPresent" type="number" min="0" placeholder="e.g. 32" />
+      </fieldset>
+
+      <fieldset>
+        <legend>Tutorials (0.5 point each)</legend>
+        <label for="tutTotal"> Total tutorials </label>
+        <input id="tutTotal" type="number" min="0" placeholder="e.g. 20" />
+        <label for="tutPresent"> Tutorials attended </label>
+        <input id="tutPresent" type="number" min="0" placeholder="e.g. 15" />
+      </fieldset>
+
+      <fieldset>
+        <legend>Labs (2 points each)</legend>
+        <label for="pracTotal"> Total practicals </label>
+        <input id="pracTotal" type="number" min="0" placeholder="e.g. 10" />
+        <label for="labPresent"> Practicals attended </label>
+        <input id="labPresent" type="number" min="0" placeholder="e.g. 8" />
+      </fieldset>
+
+      <div class="controls">
+        <div>Target: <span class="strong">75%</span></div>
+        <button type="submit">Calculate</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <div> Attendance progress </div>
+          <div id="progressPercent">0%</div>
+        </div>
+        <div class="progress"><div class="fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="result" id="result"></div>
+    </form>
+  </div>
+
+  <div class="watermark">AM</div>
+
+  <script>
+    const weightage = { lecture: 1, tutorial: 0.5, practical: 2 };
+    const target = 0.75;
+
+    function val(id) {
+      const n = parseFloat(document.getElementById(id).value);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    }
+
+    function calculateAttendance() {
+      const totals = {
+        lect: val("lectTotal"),
+        tut: val("tutTotal"),
+        prac: val("pracTotal"),
+      };
+      const attended = {
+        lect: val("lectPresent"),
+        tut: val("tutPresent"),
+        prac: val("labPresent"),
+      };
+
+      const totalPoints =
+        totals.lect * weightage.lecture +
+        totals.tut * weightage.tutorial +
+        totals.prac * weightage.practical;
+      const presentPoints =
+        attended.lect * weightage.lecture +
+        attended.tut * weightage.tutorial +
+        attended.prac * weightage.practical;
+
+      const result = document.getElementById("result");
+      const bar = document.getElementById("progressFill");
+      const percentText = document.getElementById("progressPercent");
+
+      if (
+        attended.lect > totals.lect ||
+        attended.tut > totals.tut ||
+        attended.prac > totals.prac
+      ) {
+        result.textContent = "Error: Attended values cannot exceed totals.";
+        bar.style.width = "0%";
+        percentText.textContent = "0%";
+        return;
+      }
+
+      if (totalPoints === 0) {
+        result.textContent = "Please enter at least one total value.";
+        bar.style.width = "0%";
+        percentText.textContent = "0%";
+        return;
+      }
+
+      const percent = (presentPoints / totalPoints) * 100;
+      const display = percent.toFixed(2);
+      bar.style.width = display + "%";
+      percentText.textContent = display + "%";
+
+      let message = `Your overall attendance is ${display}%. `;
+
+      if (percent < target * 100) {
+        const needed = (target * totalPoints - presentPoints) / (1 - target);
+        const lecturesNeeded = Math.ceil(needed);
+        message += `You need about ${lecturesNeeded} more lecture-equivalent classes to reach 75%.`;
+      } else {
+        const missable = (presentPoints / target) - totalPoints;
+        const canMiss = Math.floor(Math.max(0, missable));
+        message += canMiss > 0
+          ? `You can miss ${canMiss} more lecture-equivalent classes and stay above 75%.`
+          : `You're at the 75% mark. `;
+      }
+
+      result.textContent = message;
+    }
+  </script>
+</body>
+</html>
